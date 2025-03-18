@@ -1,0 +1,70 @@
+# Configuration file for 10x Genomics Visium Spatial Transcriptomics Analysis Pipeline
+
+# General settings
+results_dir: "results"
+
+# Reference genome and transcriptome
+reference_genome: "/path/to/reference_genome"
+reference_transcriptome: "/path/to/reference_transcriptome"
+
+# Space Ranger path
+spaceranger_path: "/path/to/spaceranger"
+
+# Slide information
+slide_file: "/path/to/slide_file.gpr"  # Required for Space Ranger
+
+# Sample information
+samples:
+  sample1:
+    fastq_path: "/path/to/sample1/fastq"
+    image_path: "/path/to/sample1/tissue_image.tif"
+    tissue_positions_path: "/path/to/sample1/tissue_positions_list.csv"
+    tissue_area: "A1"  # Capture area on the slide
+  
+  sample2:
+    fastq_path: "/path/to/sample2/fastq"
+    image_path: "/path/to/sample2/tissue_image.tif"
+    tissue_positions_path: "/path/to/sample2/tissue_positions_list.csv"
+    tissue_area: "B1"  # Capture area on the slide
+
+# Analysis parameters
+analysis:
+  # QC parameters
+  qc:
+    min_genes: 200
+    max_genes: 6000
+    max_mt_percent: 20
+  
+  # Clustering parameters
+  clustering:
+    resolutions: [0.2, 0.4, 0.6, 0.8, 1.0]
+    n_neighbors: 15
+    n_pcs: 30
+  
+  # Differential expression parameters
+  de:
+    logfc_threshold: 0.25
+    min_pct: 0.1
+    only_pos: True
+  
+  # Spatial variable genes parameters
+  svg:
+    n_top_genes: 100
+  
+  # Deconvolution parameters
+  deconvolution:
+    # Use built-in reference or path to custom reference
+    reference: "built-in"  # or "/path/to/custom/reference"
+    # Minimum cell type proportion to consider
+    min_prop: 0.01
+  
+  # Pathway analysis parameters
+  pathway:
+    organism: "human"  # Options: "human", "mouse", "rat"
+    pval_cutoff: 0.05
+    qval_cutoff: 0.2
+
+# Execution parameters
+execution:
+  max_threads: 16
+  max_memory_gb: 64

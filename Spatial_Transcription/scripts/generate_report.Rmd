@@ -1,0 +1,452 @@
+---
+title: "10x Genomics Visium Spatial Transcriptomics Analysis Report"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: cosmo
+    highlight: tango
+    code_folding: hide
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE, 
+  warning = FALSE, 
+  message = FALSE,
+  fig.width = 10,
+  fig.height = 8
+)
+
+# Load required libraries
+library(Seurat)
+library(dplyr)
+library(ggplot2)
+library(pheatmap)
+library(knitr)
+library(kableExtra)
+library(reticulate)
+library(DT)
+library(patchwork)
+library(viridis)
+library(ggrepel)
+library(cowplot)
+
+# Get parameters from Snakemake
+seurat_rds <- snakemake@input[["seurat_rds"]]
+scanpy_h5ad <- snakemake@input[["scanpy_h5ad"]]
+deconvolution <- snakemake@input[["deconvolution"]]
+pathways <- snakemake@input[["pathways"]]
+spatial_markers <- snakemake@input[["spatial_markers"]]
+```
+
+# Executive Summary
+
+This report presents the comprehensive analysis of 10x Genomics Visium spatial transcriptomics data. The analysis includes quality control, preprocessing, clustering, marker gene identification, spatial expression patterns, cell type deconvolution, and pathway enrichment analysis.
+
+```{r load-data}
+# Load Seurat object
+visium_data <- readRDS(seurat_rds)
+
+# Load additional results
+deconv_results <- read.csv(deconvolution)
+pathway_results <- read.csv(pathways)
+marker_genes <- read.csv(spatial_markers)
+```
+
+# Dataset Overview
+
+## Sample Information
+
+```{r sample-info}
+# Extract metadata and create a summary table
+metadata <- visium_data@meta.data
+
+# Sample metrics
+sample_metrics <- data.frame(
+  Sample = ifelse("sample" %in% colnames(metadata), 
+                 unique(metadata$sample), 
+                 paste("Sample", 1:length(unique(metadata$orig.ident)))),
+  
+  Total_Spots = nrow(metadata),
+  
+  Mean_Genes_per_Spot = round(mean(metadata$nFeature_Spatial)),
+  
+  Mean_UMIs_per_Spot = round(mean(metadata$nCount_Spatial)),
+  
+  Median_Genes_per_Spot = round(median(metadata$nFeature_Spatial)),
+  
+  Median_UMIs_per_Spot = round(median(metadata$nCount_Spatial)),
+  
+  Number_of_Clusters = length(unique(metadata$seurat_clusters))
+)
+
+# Display the sample metrics
+kable(sample_metrics, caption = "Sample Overview") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = FALSE)
+```
+
+## Quality Control Metrics
+
+```{r qc-metrics}
+# Generate QC plots
+p1 <- VlnPlot(visium_data, features = "nFeature_Spatial", pt.size = 0) + 
+  ggtitle("Genes per Spot") + theme(plot.title = element_text(hjust = 0.5))
+
+p2 <- VlnPlot(visium_data, features = "nCount_Spatial", pt.size = 0) + 
+  ggtitle("UMIs per Spot") + theme(plot.title = element_text(hjust = 0.5))
+
+p3 <- FeatureScatter(visium_data, feature1 = "nCount_Spatial", feature2 = "nFeature_Spatial") + 
+  ggtitle("Genes vs UMIs") + theme(plot.title = element_text(hjust = 0.5))
+
+p1 + p2 + p3 + plot_layout(ncol = 3)
+```
+
+## Spatial Distribution of QC Metrics
+
+```{r spatial-qc}
+# Spatial plots of QC metrics
+DefaultAssay(visium_data) <- "Spatial"
+
+p1 <- SpatialFeaturePlot(visium_data, features = "nFeature_Spatial") + 
+  theme(legend.position = "right") + ggtitle("Genes per Spot")
+
+p2 <- SpatialFeaturePlot(visium_data, features = "nCount_Spatial") + 
+  theme(legend.position = "right") + ggtitle("UMIs per Spot")
+
+p1 / p2
+```
+
+# Clustering Analysis
+
+## Dimensional Reduction and Clustering
+
+```{r umap}
+# UMAP visualization of clusters
+p <- DimPlot(visium_data, reduction = "umap", group.by = "seurat_clusters", label = TRUE) + 
+     ggtitle("UMAP Visualization of Spatial Clusters") + 
+     theme(plot.title = element_text(hjust = 0.5))
+print(p)
+```
+
+## Spatial Distribution of Clusters
+
+```{r spatial-clusters}
+# Spatial visualization of clusters
+p <- SpatialDimPlot(visium_data, group.by = "seurat_clusters", label = TRUE, label.size = 3) + 
+     ggtitle("Spatial Distribution of Clusters") + 
+     theme(plot.title = element_text(hjust = 0.5))
+print(p)
+```
+
+## Cluster Composition
+
+```{r cluster-composition}
+# Calculate the number of spots per cluster
+cluster_counts <- table(visium_data$seurat_clusters)
+cluster_percentages <- round(100 * cluster_counts / sum(cluster_counts), 2)
+
+cluster_summary <- data.frame(
+  Cluster = names(cluster_counts),
+  Number_of_Spots = as.vector(cluster_counts),
+  Percentage = as.vector(cluster_percentages)
+)
+
+# Display cluster summary
+kable(cluster_summary, caption = "Cluster Summary") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = FALSE)
+
+# Plot cluster composition
+ggplot(cluster_summary, aes(x = Cluster, y = Number_of_Spots, fill = Cluster)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = paste0(Percentage, "%")), vjust = -0.5) +
+  theme_minimal() +
+  ggtitle("Number of Spots per Cluster") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+# Marker Gene Analysis
+
+## Top Marker Genes by Cluster
+
+```{r marker-genes}
+# Filter to top 5 markers per cluster
+top_markers <- marker_genes %>%
+  group_by(cluster) %>%
+  top_n(n = 5, wt = avg_log2FC) %>%
+  arrange(cluster, desc(avg_log2FC))
+
+# Display top markers
+kable(top_markers, caption = "Top 5 Marker Genes per Cluster") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = TRUE)
+
+# Create heatmap of top markers
+top_genes <- unique(top_markers$gene)
+DefaultAssay(visium_data) <- "SCT"
+DoHeatmap(visium_data, features = top_genes, group.by = "seurat_clusters") +
+  scale_fill_viridis() +
+  ggtitle("Expression of Top Marker Genes Across Clusters") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+## Spatial Expression of Key Marker Genes
+
+```{r spatial-expression}
+# Plot spatial expression of top markers from each cluster
+plot_genes <- marker_genes %>%
+  group_by(cluster) %>%
+  top_n(n = 1, wt = avg_log2FC) %>%
+  pull(gene)
+
+# Limit to 6 genes for plotting
+plot_genes <- plot_genes[1:min(6, length(plot_genes))]
+
+# Create spatial feature plots
+DefaultAssay(visium_data) <- "SCT"
+
+spatial_plots <- list()
+for (i in seq_along(plot_genes)) {
+  g <- plot_genes[i]
+  p <- SpatialFeaturePlot(visium_data, features = g) + 
+       theme(legend.position = "right") + 
+       ggtitle(paste0(g, " (Cluster ", marker_genes$cluster[marker_genes$gene == g][1], " marker)"))
+  spatial_plots[[i]] <- p
+}
+
+# Display plots in a grid
+wrap_plots(spatial_plots, ncol = 2)
+```
+
+# Spatially Variable Gene Analysis
+
+## Top Spatially Variable Genes
+
+```{r spatial-genes}
+# Get spatially variable genes
+if ("SpatiallyVariableFeatures" %in% methods(class = class(visium_data))) {
+  sv_genes <- SpatiallyVariableFeatures(visium_data, selection.method = "markvariogram")
+  sv_genes_df <- data.frame(gene = sv_genes[1:20])
+  
+  kable(sv_genes_df, caption = "Top 20 Spatially Variable Genes") %>%
+    kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = FALSE)
+  
+  # Plot spatial expression of top spatially variable genes
+  DefaultAssay(visium_data) <- "SCT"
+  top_sv_genes <- sv_genes[1:min(6, length(sv_genes))]
+  
+  sv_plots <- list()
+  for (i in seq_along(top_sv_genes)) {
+    g <- top_sv_genes[i]
+    p <- SpatialFeaturePlot(visium_data, features = g) + 
+         theme(legend.position = "right") + 
+         ggtitle(paste0(g, " (Spatially Variable)"))
+    sv_plots[[i]] <- p
+  }
+  
+  # Display plots in a grid
+  wrap_plots(sv_plots, ncol = 2)
+} else {
+  cat("No spatially variable gene information found in the Seurat object.")
+}
+```
+
+# Cell Type Deconvolution Analysis
+
+## Cell Type Composition
+
+```{r deconvolution}
+# Process deconvolution results
+spatial_cols <- c("row", "col", "imagerow", "imagecol")
+cell_type_cols <- setdiff(colnames(deconv_results), c("barcode", spatial_cols))
+
+# Calculate overall cell type proportions
+cell_type_averages <- colMeans(deconv_results[, cell_type_cols, drop = FALSE])
+cell_type_df <- data.frame(
+  CellType = names(cell_type_averages),
+  Proportion = as.vector(cell_type_averages)
+)
+
+# Plot overall cell type proportions
+ggplot(cell_type_df, aes(x = reorder(CellType, -Proportion), y = Proportion, fill = CellType)) +
+  geom_bar(stat = "identity") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(hjust = 0.5)) +
+  labs(x = "Cell Type", y = "Average Proportion", 
+       title = "Overall Cell Type Composition")
+```
+
+## Spatial Distribution of Cell Types
+
+```{r spatial-cell-types}
+# Add deconvolution results to Seurat object if needed
+for (cell_type in cell_type_cols) {
+  if (!cell_type %in% colnames(visium_data@meta.data)) {
+    if (all(rownames(deconv_results) %in% colnames(visium_data))) {
+      visium_data@meta.data[[cell_type]] <- deconv_results[colnames(visium_data), cell_type]
+    }
+  }
+}
+
+# Plot spatial distribution of the top cell types
+top_cell_types <- cell_type_df %>%
+  arrange(desc(Proportion)) %>%
+  head(4) %>%
+  pull(CellType)
+
+cell_type_plots <- list()
+for (ct in top_cell_types) {
+  if (ct %in% colnames(visium_data@meta.data)) {
+    p <- SpatialFeaturePlot(visium_data, features = ct) + 
+         scale_fill_viridis() +
+         theme(legend.position = "right") + 
+         ggtitle(paste0(ct, " Proportion"))
+    cell_type_plots[[ct]] <- p
+  }
+}
+
+# Display plots in a grid
+if (length(cell_type_plots) > 0) {
+  wrap_plots(cell_type_plots, ncol = 2)
+} else {
+  cat("Cell type information not properly linked to spatial coordinates.")
+}
+```
+
+## Cell Type Composition by Cluster
+
+```{r cell-type-by-cluster}
+# Merge cluster information with deconvolution results
+if (all(rownames(deconv_results) %in% colnames(visium_data))) {
+  deconv_with_clusters <- cbind(
+    deconv_results,
+    cluster = visium_data@meta.data[rownames(deconv_results), "seurat_clusters"]
+  )
+  
+  # Calculate average cell type proportions by cluster
+  cell_props_by_cluster <- lapply(unique(deconv_with_clusters$cluster), function(clust) {
+    cells_in_cluster <- deconv_with_clusters$cluster == clust
+    cluster_props <- colMeans(deconv_with_clusters[cells_in_cluster, cell_type_cols, drop = FALSE])
+    
+    data.frame(
+      cluster = clust,
+      cell_type = names(cluster_props),
+      proportion = as.numeric(cluster_props)
+    )
+  })
+  
+  cell_props_df <- do.call(rbind, cell_props_by_cluster)
+  
+  # Plot stacked barplot
+  ggplot(cell_props_df, aes(x = cluster, y = proportion, fill = cell_type)) +
+    geom_bar(stat = "identity") +
+    scale_fill_brewer(palette = "Set3") +
+    labs(title = "Cell Type Composition by Spatial Cluster",
+         x = "Spatial Cluster",
+         y = "Cell Type Proportion") +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1),
+          plot.title = element_text(hjust = 0.5))
+  
+  # Create heatmap
+  cell_props_wide <- reshape2::dcast(cell_props_df, 
+                                    cluster ~ cell_type, 
+                                    value.var = "proportion")
+  rownames(cell_props_wide) <- cell_props_wide$cluster
+  cell_props_wide$cluster <- NULL
+  
+  pheatmap(cell_props_wide,
+           color = viridis(100),
+           cluster_rows = TRUE,
+           cluster_cols = TRUE,
+           main = "Cell Type Proportions by Cluster",
+           fontsize_row = 10,
+           fontsize_col = 10,
+           angle_col = 45)
+} else {
+  cat("Deconvolution results cannot be linked to spatial data.")
+}
+```
+
+# Pathway Analysis
+
+## Enriched Pathways by Cluster
+
+```{r pathway-analysis}
+# Process pathway results
+if (nrow(pathway_results) > 0) {
+  # Display top pathways per cluster
+  top_pathways <- pathway_results %>%
+    group_by(cluster, category) %>%
+    arrange(p.adjust) %>%
+    slice_head(n = 3) %>%
+    ungroup() %>%
+    arrange(cluster, category, p.adjust)
+  
+  # Format output table
+  top_pathways_display <- top_pathways %>%
+    select(cluster, category, Description, p.adjust, Count) %>%
+    mutate(p.adjust = signif(p.adjust, 3))
+  
+  # Display top pathways
+  kable(top_pathways_display, 
+        caption = "Top 3 Enriched Pathways per Category per Cluster") %>%
+    kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = TRUE)
+  
+  # Create dotplot of top pathways across clusters
+  top_pathways_overall <- pathway_results %>%
+    group_by(Description) %>%
+    summarize(min_padj = min(p.adjust), 
+              category = category[which.min(p.adjust)]) %>%
+    arrange(min_padj) %>%
+    head(20)
+  
+  plot_data <- pathway_results %>%
+    filter(Description %in% top_pathways_overall$Description) %>%
+    mutate(pathway = paste0(category, ": ", Description),
+           neg_log_padj = -log10(p.adjust))
+  
+  # Prepare data for dotplot
+  plot_wide <- plot_data %>%
+    select(cluster, pathway, neg_log_padj, Count) %>%
+    mutate(cluster = paste0("Cluster ", cluster)) %>%
+    arrange(desc(neg_log_padj))
+  
+  # Create dotplot
+  ggplot(plot_wide, aes(x = cluster, y = pathway, size = Count, color = neg_log_padj)) +
+    geom_point() +
+    scale_color_viridis() +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1),
+          plot.title = element_text(hjust = 0.5),
+          axis.text.y = element_text(size = 8)) +
+    labs(x = "Cluster", y = "Pathway", 
+         color = "-log10(p.adj)", size = "Gene Count",
+         title = "Top Enriched Pathways Across Clusters")
+  
+} else {
+  cat("No pathway analysis results found.")
+}
+```
+
+# Conclusion
+
+This report presents a comprehensive analysis of the 10x Genomics Visium spatial transcriptomics data. Key findings include:
+
+1. **Identification of Spatial Domains**: We identified distinct spatial clusters, each with unique gene expression profiles.
+
+2. **Marker Genes**: For each cluster, we identified marker genes that characterize the different spatial domains in the tissue.
+
+3. **Cell Type Composition**: Deconvolution analysis revealed the cellular composition of each spatial domain, providing insights into tissue organization.
+
+4. **Functional Annotation**: Pathway analysis highlighted the biological processes and functions associated with each spatial domain.
+
+These findings provide insights into the spatial organization and functional heterogeneity of the tissue. Further validation of these results using complementary methods such as immunohistochemistry or in situ hybridization is recommended.
+
+---
+
+*Report generated using the Snakemake Visium Analysis Pipeline*
+
+*Date: `r format(Sys.time(), '%B %d, %Y')`*
