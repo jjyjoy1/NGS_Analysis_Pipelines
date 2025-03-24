@@ -1,0 +1,62 @@
+I compared the several of major R packages for accessing and analyzing TCGA data, highlighting their strengths, limitations, and use cases.
+
+TCGAbiolinks
+Strengths:
+Comprehensive workflow from data download to analysis
+Direct integration with GDC API
+Handles multiple data types (RNA-seq, methylation, mutations, clinical)
+Returns Bioconductor-compatible data structures (SummarizedExperiment)
+Active development and maintenance
+Extensive documentation and vignettes
+
+Limitations:
+Steeper learning curve for beginners
+Can be memory-intensive for large datasets
+Some functions have complex parameter requirements
+
+Best for: Complete analysis workflows requiring multiple data types and integration with other Bioconductor tools.
+
+GenomicDataCommons
+Strengths:
+Direct, lower-level access to GDC API
+More flexible querying capabilities
+Good for exploring metadata and available data types
+Lightweight compared to TCGAbiolinks
+
+Limitations:
+Less pre-processing functionality
+Requires more custom code for analysis
+Fewer high-level analysis functions
+
+Best for: Targeted data retrieval, exploring available data, and building custom analysis pipelines.
+
+
+RTCGA
+Strengths:
+Provides pre-processed datasets
+Simple and consistent API
+Good for quick exploration of TCGA data
+Integration with ggplot2 for visualizations
+
+Limitations:
+Uses older TCGA data (legacy database)
+Not connected to current GDC API
+Limited to pre-packaged datasets
+
+Best for: Quick exploratory analysis and teaching purposes.
+
+TCGAretriever
+Strengths:
+Simplified interface for downloading TCGA data
+Easy filtering and subsetting of data
+User-friendly for beginners
+Good for retrieving specific datasets
+
+Limitations:
+Less comprehensive than TCGAbiolinks
+Fewer analytical functions
+Less active development
+
+Best for: Beginners or those needing quick access to specific TCGA datasets.
+
+
