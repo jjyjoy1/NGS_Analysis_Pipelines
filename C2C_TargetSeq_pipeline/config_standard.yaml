@@ -1,0 +1,66 @@
+# Configuration file for standard C2C sequencing pipeline
+# File: config_standard.yaml
+
+# Number of threads to use for each process
+threads: 16
+
+# Path to output directory
+output_dir: "/path/to/output"
+
+# Reference genome configuration
+reference:
+  genome: "/path/to/reference.fa"
+  annotation: "/path/to/annotation.gtf"
+  known_sites: "/path/to/dbsnp.vcf.gz"
+  regions_of_interest: "/path/to/targets.bed"
+
+# Sample information
+samples:
+  sample1:
+    r1: "/path/to/sample1_R1.fastq.gz"
+    r2: "/path/to/sample1_R2.fastq.gz"
+    platform: "illumina"
+    library: "lib1"
+  
+  sample2:
+    r1: "/path/to/sample2_R1.fastq.gz"
+    r2: "/path/to/sample2_R2.fastq.gz"
+    platform: "illumina"
+    library: "lib2"
+
+# Pipeline parameters
+params:
+  # Preprocessing parameters
+  preprocessing:
+    quality_threshold: 30
+    min_length: 75
+    adapter_r1: "/path/to/TruSeq3-PE-1.fa"
+    adapter_r2: "/path/to/TruSeq3-PE-2.fa"
+  
+  # Consensus generation parameters for C2C
+  consensus:
+    min_quality: 0.99
+    min_coverage: 3
+    consensus_threshold: 0.8
+  
+  # Alignment parameters
+  alignment:
+    mapq_threshold: 20
+    soft_clipping: true
+    min_score: 30
+  
+  # Variant calling parameters
+  variant_calling:
+    min_call_quality: 20
+    min_depth: 10
+    ploidy: 2
+  
+  # Structural variant parameters
+  sv_calling:
+    min_size: 50
+    max_size: 1000000
+  
+  # QC parameters
+  qc:
+    min_coverage: 30
+

@@ -1,0 +1,54 @@
+# Configuration file for Illumina DRAGEN C2C sequencing pipeline
+# File: config.yaml
+
+# Path to DRAGEN executable
+dragen_path: "/opt/edico/bin"
+
+# Path to output directory
+output_dir: "/path/to/output"
+
+# Reference genome configuration
+reference:
+  genome: "/path/to/reference"
+  annotation: "/path/to/annotation.gtf"
+
+# Sample information
+samples:
+  sample1:
+    r1: "/path/to/sample1_R1.fastq.gz"
+    r2: "/path/to/sample1_R2.fastq.gz"
+    platform: "illumina"
+    library: "lib1"
+  
+  sample2:
+    r1: "/path/to/sample2_R1.fastq.gz"
+    r2: "/path/to/sample2_R2.fastq.gz"
+    platform: "illumina"
+    library: "lib2"
+
+# Pipeline parameters
+params:
+  # C2C specific parameters
+  c2c:
+    min_quality: 30
+    min_length: 100
+    consensus_threshold: 0.8
+  
+  # Alignment parameters
+  align:
+    mapq_threshold: 20
+    soft_clipping: true
+    aln_min_score: 30
+  
+  # Variant calling parameters
+  variant_calling:
+    min_call_quality: 20
+    min_depth: 10
+    sv_min_size: 50
+    sv_max_size: 1000000
+  
+  # QC parameters
+  qc:
+    min_coverage: 30
+    target_regions: "/path/to/targets.bed"
+
