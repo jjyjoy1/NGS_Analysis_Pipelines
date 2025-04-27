@@ -1,0 +1,53 @@
+# Configuration file for TMB Snakemake pipeline
+
+# Output directory
+output_dir: "results"
+
+# Sample information
+samples:
+  tumor1:
+    r1: "data/tumor1_R1.fastq.gz"
+    r2: "data/tumor1_R2.fastq.gz"
+  normal1:
+    r1: "data/normal1_R1.fastq.gz"
+    r2: "data/normal1_R2.fastq.gz"
+  tumor2:
+    r1: "data/tumor2_R1.fastq.gz"
+    r2: "data/tumor2_R2.fastq.gz"
+
+# Define tumor samples
+tumor_samples:
+  tumor1: {}
+  tumor2: {}
+
+# Define normal samples (if paired analysis)
+normal_samples:
+  normal1: {}
+
+# Define tumor-normal pairs (for paired analysis)
+pairs:
+  tumor1: "normal1"
+  # tumor2 has no paired normal, will be processed in tumor-only mode
+
+# Set to true for paired tumor-normal analysis
+# If false, all tumors will be processed in tumor-only mode
+paired_analysis: true
+
+# Reference files
+reference:
+  genome: "references/hg38.fa"
+  known_variants: "references/1000G_phase1.snps.high_confidence.hg38.vcf.gz"
+  dbsnp: "references/dbsnp_146.hg38.vcf.gz"
+  capture_bed: "references/exome_capture_regions.bed"
+  refseq: "references/refseq.txt"
+
+# Adapter sequences for trimming
+adapters: "references/adapters.fa"
+
+# Annotation resources
+funcotator_data_sources: "references/funcotator_dataSources"
+oncotator_db_dir: "references/oncotator_v1_ds_April052016"
+
+# Additional parameters
+trimmomatic_params: ""
+

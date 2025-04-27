@@ -1,0 +1,13 @@
+name: tmb_annotation
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - gatk4=4.2.2.0
+  - snpeff=5.0
+  - snpsift=4.3.1t
+  - pysam=0.18.0
+  - pandas=1.3.3
+  - pytabix=0.0.2
+

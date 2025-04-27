@@ -1,0 +1,8 @@
+name: tmb_qc
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - fastqc=0.11.9
+  - multiqc=1.12

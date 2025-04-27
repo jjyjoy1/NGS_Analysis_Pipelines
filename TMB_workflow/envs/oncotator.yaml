@@ -1,0 +1,11 @@
+name: tmb_oncotator
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - oncotator=1.9.9.0
+  - python=2.7
+  - numpy=1.16.5
+  - pandas=0.24.2
+  - pytabix=0.0.2

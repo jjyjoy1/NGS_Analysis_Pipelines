@@ -1,0 +1,10 @@
+name: tmb_align
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - bwa=0.7.17
+  - samtools=1.13
+  - picard=2.25.7
+  - gatk4=4.2.2.0

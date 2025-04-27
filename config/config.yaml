@@ -1,5 +1,0 @@
-input_fastq: "input.fastq.gz"
-reference_genome: "reference_genome.fa"
-output_dir: "results"
-
-
