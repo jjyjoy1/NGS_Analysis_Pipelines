@@ -1,0 +1,71 @@
+__default__:
+  partition: "normal"
+  time: "04:00:00"
+  account: "your_account"
+
+sample_qc:
+  partition: "normal"
+  time: "12:00:00"
+  mem: 16G
+  threads: 4
+
+variant_qc:
+  partition: "normal"
+  time: "12:00:00"
+  mem: 16G
+  threads: 4
+
+imputation_prep:
+  partition: "normal"
+  time: "24:00:00"
+  mem: 16G
+  threads: 4
+
+process_imputed:
+  partition: "normal"
+  time: "24:00:00"
+  mem: 32G
+  threads: 4
+
+make_grm:
+  partition: "mem"
+  time: "24:00:00"
+  mem: 64G
+  threads: 16
+
+estimate_heritability:
+  partition: "mem"
+  time: "24:00:00"
+  mem: 64G
+  threads: 16
+
+gwas_mlma_loco:
+  partition: "mem"
+  time: "48:00:00"
+  mem: 64G
+  threads: 16
+
+cojo_analysis:
+  partition: "normal"
+  time: "12:00:00"
+  mem: 32G
+  threads: 8
+
+credible_sets:
+  partition: "normal"
+  time: "06:00:00"
+  mem: 16G
+  threads: 4
+
+colocalization:
+  partition: "normal"
+  time: "12:00:00"
+  mem: 16G
+  threads: 4
+
+create_prs:
+  partition: "normal"
+  time: "06:00:00"
+  mem: 16G
+  threads: 4
+

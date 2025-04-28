@@ -1,0 +1,42 @@
+# GWAS Pipeline Configuration File
+
+# Input/Output paths
+raw_data: "path/to/your_raw_genotype_data"
+output_dir: "results"
+phenotype_file: "data/phenotypes.txt"
+covariate_file: "data/covariates.txt"
+eqtl_file: "data/eqtl_data.txt"
+
+# Phenotype and covariate information
+phenotype_name: 1  # Column number for phenotype (1-based)
+covariate_names: "2,3,4-23"  # Column numbers for covariates (age, sex, top 20 PCs)
+
+# QC thresholds
+qc:
+  mind: 0.05     # Sample missingness threshold
+  geno: 0.05     # SNP missingness threshold
+  maf: 0.01      # Minor allele frequency threshold
+  hwe: 0.000001  # Hardy-Weinberg equilibrium p-value threshold
+  genome_min: 0.185  # Relatedness threshold (IBD)
+  diffmiss_pval: 0.00001  # Differential missingness p-value threshold
+
+# Analysis parameters
+analysis:
+  cojo_p_threshold: 0.00000005  # 5e-8, genome-wide significance
+  credible_set_window: 500000   # Window size for credible sets (500kb)
+  coloc_window: 500000          # Window size for colocalization (500kb)
+  prs_p_threshold: 0.05         # P-value threshold for PRS
+
+# Computing resources
+resources:
+  gcta_threads: 8  # Number of threads for GCTA
+  mem_gb_gcta: 32  # Memory for GCTA in GB
+  mem_gb_plink: 16 # Memory for PLINK in GB
+  
+# Cluster configuration (for HPC environments)
+cluster:
+  partition: "normal"
+  time: "24:00:00"
+  account: "your_account"
+
+
