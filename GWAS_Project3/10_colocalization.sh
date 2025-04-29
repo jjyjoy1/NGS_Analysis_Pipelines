@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Set paths to your tools and data
+PLINK="/path/to/plink"
+GCTA="/path/to/gcta"
+RAW_DATA="your_raw_genotype_data"
+OUT_PREFIX="breast_cancer_gwas"
+
 # STEP 10: Fine-mapping (example for one significant region)
 # Extract SNPs in region (e.g., 1Mb window around top SNP)
 TOP_SNP="rs12345"

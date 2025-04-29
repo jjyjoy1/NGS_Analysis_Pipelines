@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Set paths to your tools and data
+PLINK="/path/to/plink"
+GCTA="/path/to/gcta"
+RAW_DATA="your_raw_genotype_data"
+OUT_PREFIX="breast_cancer_gwas"
+
+
 # STEP 4: After imputation, convert back to PLINK format
 # Assuming imputed files have been downloaded as VCFs
 for CHR in {1..22}

@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Set paths to your tools and data
+PLINK="/path/to/plink"
+GCTA="/path/to/gcta"
+RAW_DATA="your_raw_genotype_data"
+OUT_PREFIX="breast_cancer_gwas"
+
 # Continue from QC_complete dataset
 QC_DATA="${OUT_PREFIX}_QC_complete"
 
