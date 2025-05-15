@@ -220,9 +220,12 @@ def calculate_ld_preservation(self, result_file, params):
 
 ```
 
-##5. Polygenic Risk Score Performance
-**Description:** Test how well the identified SNPs predict the phenotype through polygenic risk scoring.
-**Implementation:**
+
+```
+## 5. Polygenic Risk Score Performance
+**Description**: Test how well the identified SNPs predict the phenotype through polygenic risk scoring.
+
+**Implementation**:
 ```python
 def calculate_prs_performance(self, result_file, params):
     """Calculate predictive performance of PRS using the GWAS results."""
@@ -292,13 +295,14 @@ def calculate_prs_performance(self, result_file, params):
     return best_r2
 ```
 
-Why it's valuable: PRS performance directly measures the practical utility of the GWAS results for phenotype prediction, which is often a key goal of genetic studies.
+**Why it's valuable**: PRS performance directly measures the practical utility of the GWAS results for phenotype prediction, which is often a key goal of genetic studies.
 
-##6. Population Stratification Robustness
-**Description:** Evaluate how well the parameters handle population stratification.
+---
 
-**Implementation:**
+## 6. Population Stratification Robustness
+**Description**: Evaluate how well the parameters handle population stratification.
 
+**Implementation**:
 ```python
 def calculate_population_robustness(self, result_file, params):
     """Calculate robustness to population stratification."""
@@ -345,15 +349,15 @@ def calculate_population_robustness(self, result_file, params):
     return combined_score
 ```
 
-Why it's valuable: This metric helps identify parameter settings that produce results robust to population structure, reducing the risk of spurious associations.
+**Why it's valuable**: This metric helps identify parameter settings that produce results robust to population structure, reducing the risk of spurious associations.
 
-##7. Genetic Correlation with Related Traits
+---
 
-**Description:** Measure genetic correlation between the GWAS results and those from related phenotypes.
+## 7. Genetic Correlation with Related Traits
+**Description**: Measure genetic correlation between the GWAS results and those from related phenotypes.
 
-**Implementation:**
+**Implementation**:
 ```python
-
 def calculate_genetic_correlation(self, result_file, params):
     """Calculate genetic correlation with related traits."""
     # This would typically use tools like LDSC
@@ -391,7 +395,22 @@ def calculate_genetic_correlation(self, result_file, params):
         return sum(correlations) / len(correlations)
     else:
         return 0
-
 ```
-Why it's valuable: Genetic correlation with related traits helps validate the biological relevance of the GWAS results and can identify parameter settings that better capture the shared genetic architecture.
 
+**Why it's valuable**: Genetic correlation helps validate findings against established results and can reveal shared genetic architecture between traits.
+
+---
+
+## Summary of Optimization Metrics
+| Metric | Weight | Purpose |
+|--------|--------|---------|
+| Heritability Estimation | 20% | Assess genetic architecture capture |
+| Replication Consistency | 20% | Validate robustness across subsets |
+| Functional Enrichment | 15% | Prioritize biologically relevant variants |
+| LD Structure Preservation | 15% | Maintain natural genomic patterns |
+| PRS Performance | 15% | Measure predictive utility |
+| Population Robustness | 10% | Control for stratification effects |
+| Genetic Correlation | 5% | Validate against known associations |
+
+These metrics collectively ensure the optimization process balances statistical power, biological relevance, and practical utility of the GWAS results.
+```
