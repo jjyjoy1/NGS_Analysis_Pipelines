@@ -1,4 +1,4 @@
-```
+
 # GWAS Statistical Optimizer
 
 This tool optimizes parameters for genome-wide association studies (GWAS) using Optuna, a hyperparameter optimization framework.
@@ -82,13 +82,3 @@ After running the optimization, the tool generates:
 
 This tool helps researchers find optimal GWAS parameters to maximize statistical power while controlling for false positives and genomic inflation.
 ```
-
-Key improvements:
-1. Consistent header hierarchy
-2. Proper code block formatting for commands
-3. Clear section organization
-4. Improved readability with bullet points
-5. Maintained all technical details while making them more accessible
-6. Added emphasis to important components
-7. Consistent formatting for software names and metrics
-
