@@ -1,4 +1,4 @@
-```
+
 # Additional GWAS Optimization Metrics
 
 ## 1. Heritability Estimation
