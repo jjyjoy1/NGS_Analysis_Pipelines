@@ -58,14 +58,7 @@ The platform can be easily extended with:
 - Time-series proteomics analysis
 - Single-cell proteomics support
 - Cloud deployment options
-```
 
-This Markdown version includes:
-- Headers for major sections
-- Subheaders for subsections
-- Bullet points for lists
-- Bold text for emphasis
-- Clean formatting that will render well in any Markdown viewer
 
 
 
