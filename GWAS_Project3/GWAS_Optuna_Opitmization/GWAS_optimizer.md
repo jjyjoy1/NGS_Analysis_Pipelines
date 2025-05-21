@@ -1,6 +1,4 @@
-Here's the converted markdown version of your PDF:
 
-```markdown
 # Optimizing GWAS Parameters for Downstream Hypotheses: A Back-to-Front Perspective
 
 ## Reimagining GWAS Optimization from Endpoint to Beginning
