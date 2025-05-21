@@ -1,6 +1,5 @@
-Here's your content converted to Markdown format:
 
-```markdown
+```
 # Comprehensive Snakemake Workflow for Proteomics Data Analysis
 
 I created a comprehensive Snakemake workflow for proteomics data analysis that covers all the key steps for proteomics data analysis.
