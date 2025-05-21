@@ -905,6 +905,6 @@ When selecting an objective function, consider:
    - Polygenic risk score development has different optimal parameters
    - Meta-analysis participation requires specific statistical considerations
 
-
+The best approach is often to try multiple objective functions on a subset of data and compare their performance in terms of biological plausibility, statistical robustness, and alignment with study goals.
 
 
