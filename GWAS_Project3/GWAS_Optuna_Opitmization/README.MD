@@ -137,14 +137,6 @@ For computational efficiency, consider sequential optimization:
 2. **Stage 2**: Optimize association parameters with fixed QC (50 trials)
 3. **Stage 3**: Optimize PRS parameters with fixed GWAS (100 trials)
 
-### Resume Optimization
-
-```bash
-python gwas_stat_optimizer.py \
-  --resume-study \
-  --study-name my_optimization \
-  [other parameters...]
-```
 
 ### Optimization Tips
 
@@ -152,8 +144,6 @@ python gwas_stat_optimizer.py \
 2. **Parallel Processing**: Use `--n-jobs` > 1 for faster optimization
 3. **Early Stopping**: Use Optuna's pruning for efficiency
 4. **Incremental Approach**: Optimize stages sequentially rather than jointly
-
-
 
 ### Related Publications
 
